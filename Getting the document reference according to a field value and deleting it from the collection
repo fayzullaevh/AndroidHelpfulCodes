@@ -1,0 +1,21 @@
+db.collection("favorites").document(FirebaseAuth.getInstance().getCurrentUser().getEmail())
+                            .collection("my favorites").whereEqualTo("postID", bundle.getString("postID"))
+                            .get()
+                            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>(){
+                                @Override
+                                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                    if (task.isSuccessful()) {
+                                        for (DocumentSnapshot document : task.getResult()) {
+                                            document.getReference().delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                @Override
+                                                public void onSuccess(Void aVoid) {
+                                                    Toast.makeText(getContext(), "Removed item from Favorites List", Toast.LENGTH_SHORT).show();
+                                                    imageViewFavorite.setImageResource(R.drawable.ic_favorite_border_black_24dp);
+                                                    found = false;
+                                                }
+                                            }).addOnFailureListener(new OnFailureListener() {
+                                                @Override
+                                                public void onFailure(@NonNull Exception e) {
+                                                    Toast.makeText(getContext(), "Could not remove the item from Favorites List. Try again later!", Toast.LENGTH_SHORT).show();
+                                                }
+                                            });
