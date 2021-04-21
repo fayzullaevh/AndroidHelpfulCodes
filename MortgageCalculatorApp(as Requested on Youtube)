@@ -1,0 +1,158 @@
+package com.example.mortgagecalculator;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.widget.EditText;
+import android.widget.SeekBar;
+import android.widget.TextView;
+
+import org.w3c.dom.Text;
+import java.lang.Math;
+
+import java.text.NumberFormat;
+
+public class MainActivity extends AppCompatActivity {
+
+    private static final NumberFormat currencyFormat =
+            NumberFormat.getCurrencyInstance();
+
+    private double purchasePrice = 0.0;
+    private double interestRate = 0.0;
+    private double downPayment = 0.0;
+    private int years = 30;
+    private double monthlyPayment = 0.0;
+
+    private TextView loanAmountTextView;
+    private TextView yearsTextView;
+    private TextView monthlyTextView;
+    private SeekBar yearsSeekBar;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        loanAmountTextView =(TextView) findViewById(R.id.loanAmountTextView);
+        yearsTextView = (TextView) findViewById(R.id.yearsTextView);
+        monthlyTextView =  findViewById(R.id.monthlyTextView);
+
+        loanAmountTextView.setText(currencyFormat.format(0));
+        monthlyTextView.setText(currencyFormat.format(0));
+
+        yearsTextView.setText(0 + " years");
+
+        EditText purchaseEditText =  findViewById(R.id.purchaseEditText);
+        purchaseEditText.addTextChangedListener(purchaseTextWachter);
+
+        EditText downEditText = (EditText) findViewById(R.id.downEditText);
+        downEditText.addTextChangedListener(downTextWatcher);
+
+        EditText interestEditText = (EditText) findViewById(R.id.interestEditText);
+        interestEditText.addTextChangedListener(interestTextWatcher);
+
+        yearsSeekBar = findViewById(R.id.yearsSeekBar);
+        yearsSeekBar.setOnSeekBarChangeListener(yearsSeekBarListener);
+
+    }
+
+    private SeekBar.OnSeekBarChangeListener yearsSeekBarListener = new SeekBar.OnSeekBarChangeListener() {
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+            years = i;
+
+            calculate();
+        }
+
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+
+        }
+
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+
+        }
+    };
+
+    private TextWatcher interestTextWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            try {
+                interestRate = (Double.parseDouble(charSequence.toString()))/100.00;
+            }
+            catch (NumberFormatException e) {
+                interestRate = 0.00;
+            }
+
+            calculate();
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+
+        }
+    };
+
+    private TextWatcher downTextWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            try {
+                downPayment = Double.parseDouble(charSequence.toString());
+            }
+            catch(NumberFormatException e) {
+                downPayment = 0.0;
+            }
+
+            calculate();
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+
+        }
+    };
+
+    private TextWatcher purchaseTextWachter = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            try {
+                purchasePrice = Double.parseDouble(charSequence.toString());
+            }
+            catch(NumberFormatException e) {
+                purchasePrice = 0.0;
+            }
+            calculate();
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+
+        }
+    };
+
+    private void calculate(){
+        yearsTextView.setText(years + " years");
+        loanAmountTextView.setText(currencyFormat.format((purchasePrice-downPayment)));
+
+        monthlyPayment = ((purchasePrice-downPayment)*interestRate)/(1 - (1/Math.pow((1+interestRate),12*years)));
+        monthlyTextView.setText(currencyFormat.format(monthlyPayment));
+    }
+}
